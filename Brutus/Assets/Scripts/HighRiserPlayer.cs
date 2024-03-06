@@ -26,6 +26,23 @@ public class HighRiserPlayer : MonoBehaviour
         // Move left and right continuously
         float horizontalInput = Input.GetAxis("Horizontal");
         Vector3 movement = new Vector3(1, 0f, 0f);
+
+        // Get the SpriteRenderer component
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+
+        // Flip the sprite based on the movement direction
+        if (horizontalInput > 0)
+        {
+            // Moving right, flipX should be false
+            spriteRenderer.flipX = false;
+        }
+        else if (horizontalInput < 0)
+        {
+            // Moving left, flipX should be true
+            spriteRenderer.flipX = true;
+        }
+        Debug.Log("Local Scale: " + transform.localScale);
+        
         if(isGrounded)
         transform.Translate(movement * moveSpeed * Time.deltaTime);
 
@@ -70,7 +87,7 @@ public class HighRiserPlayer : MonoBehaviour
         // Check if the player has collided with a wall to change direction
         if (collision.gameObject.CompareTag("Wall") && transform.position.x < 0)
         {
-            Debug.Log("Ammachi");
+            //Debug.Log("Ammachi");
             // Change direction only when hitting the wall on the left side (x < 0)
             moveSpeed = Mathf.Abs(moveSpeed); // Make moveSpeed positive
         }
