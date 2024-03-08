@@ -1719,11 +1719,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0815b66fca0635d4db07c9f38dd87aff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: -6
-  jumpForce: 11
+  moveSpeed: -4
+  jumpForce: 12
   gravityMultiplier: 4
   jumpGravityMultiplier: 6
-  cameraTransform: {fileID: 0}
+  wallCollisionCheckDistance: 0.1
+  cameraTransform: {fileID: 987618487}
   cameraMoveSpeed: 2
 --- !u!95 &987618489
 Animator:
@@ -2675,7 +2676,7 @@ Grid:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1715775884}
   m_Enabled: 1
-  m_CellSize: {x: 1, y: 1, z: 0}
+  m_CellSize: {x: 0.2, y: 0.2, z: 0}
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
