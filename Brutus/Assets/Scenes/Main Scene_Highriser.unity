@@ -3641,7 +3641,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.033515934, y: 0.00010100007}
+  m_Offset: {x: -0.03351593, y: 0.004877113}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -3652,7 +3652,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.25064972, y: 0.3501913}
+  m_Size: {x: 0.25064972, y: 0.34063905}
   m_EdgeRadius: 0
 --- !u!212 &987618486
 SpriteRenderer:
@@ -3694,7 +3694,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: -69067653, guid: 25b67ab69755f994090e7474bb4c2b80, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -3715,7 +3715,7 @@ Transform:
   m_GameObject: {fileID: 987618483}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.57, y: -3.256, z: 0}
+  m_LocalPosition: {x: 0.57, y: -3.27, z: 0}
   m_LocalScale: {x: 1.2751997, y: 1.2832991, z: 0.43431}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3737,7 +3737,6 @@ MonoBehaviour:
   jumpForce: 11
   gravityMultiplier: 4
   jumpGravityMultiplier: 6
-  wallCollisionCheckDistance: 0.1
   cameraTransform: {fileID: 519420032}
   cameraMoveSpeed: 2
   collisionSound: {fileID: 8300000, guid: 0cde5beb6228f3b4399d85f653efe78b, type: 3}
@@ -6233,7 +6232,7 @@ Transform:
   m_GameObject: {fileID: 1540515941}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3, y: 4.4098, z: 0}
+  m_LocalPosition: {x: -3.09, y: 4.4098, z: 0}
   m_LocalScale: {x: 0.2891, y: 8.551985, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6949,7 +6948,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 4b8f64b44ee94e140af7dd1a642b35bd, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

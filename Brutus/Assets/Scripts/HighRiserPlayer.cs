@@ -27,14 +27,16 @@ public class HighRiserPlayer : MonoBehaviour
 
     public GameObject WinScreen;
 
+    private bool isFacingRight = true;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-<<<<<<< Updated upstream
-=======
+
         originalCameraY = cameraTransform.position.y;
         initialPosition = this.transform.position;
         initialRotation = this.transform.rotation;
+
 
         playerSpriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -42,7 +44,7 @@ public class HighRiserPlayer : MonoBehaviour
         {
             Debug.LogError("AudioSource component not found! Please attach an AudioSource component.");
         }
->>>>>>> Stashed changes
+
     }
 
     void Update()
@@ -120,11 +122,13 @@ public class HighRiserPlayer : MonoBehaviour
             Debug.Log("Ammachi");
             // Change direction only when hitting the wall on the left side (x < 0)
             moveSpeed = Mathf.Abs(moveSpeed); // Make moveSpeed positive
+            Flip();
         }
         else if (collision.gameObject.CompareTag("Wall") && transform.position.x > 0)
         {
             // Change direction only when hitting the wall on the right side (x > 0)
-            moveSpeed = -Mathf.Abs(moveSpeed); // Make moveSpeed negative
+            moveSpeed = -Mathf.Abs(moveSpeed); // Make moveSpeed negativeFlip();
+            Flip();
         }
     }
 
@@ -134,6 +138,7 @@ public class HighRiserPlayer : MonoBehaviour
         // You can customize this position based on your requirements
         transform.position = initialPosition;
         transform.rotation = initialRotation;
+        this.GetComponent<SpriteRenderer>().flipX = false;
         isBlinking = true;
 
         StartCoroutine(BlinkEffect(1f, 0.08f));
@@ -162,5 +167,14 @@ public class HighRiserPlayer : MonoBehaviour
         // Ensure the player's sprite is visible at the end of the blink effect
         playerSpriteRenderer.enabled = true;
         moveSpeed = -1.42f;
+    }
+
+    void Flip()
+    {
+        if (this.GetComponent<SpriteRenderer>().flipX == true)
+        {
+            this.GetComponent<SpriteRenderer>().flipX = false;
+        }
+        else { this.GetComponent<SpriteRenderer>().flipX = true; }
     }
 }
