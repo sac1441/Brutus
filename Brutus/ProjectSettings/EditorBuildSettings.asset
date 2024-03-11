@@ -5,13 +5,16 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Main Scene_Art.unity
     guid: 8f2a33da7d7fb8843bc8dc5073b4da62
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Main Scene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/CollectiblesScene.unity
     guid: 64449d61953b5ba4481634f24b9a273d
+  - enabled: 1
+    path: Assets/Scenes/Main Scene_Highriser.unity
+    guid: b27cc13595ef7e14e809c95211085d57
   m_configObjects: {}

@@ -56,12 +56,13 @@ public class HighRiserPlayer : MonoBehaviour
         transform.Translate(movement * moveSpeed * Time.deltaTime);
 
         // Jump when the space button is pressed and the player is grounded
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if ((Input.GetButtonDown("Jump") || IsTouchInput()) && isGrounded)
         {
             rb.AddForce(Vector3.up * jumpForce, (ForceMode2D)ForceMode.Impulse);
             isGrounded = false;
             // Increase gravity during the jump
             rb.gravityScale = jumpGravityMultiplier;
+            MoveCamera();
         }
 
 
@@ -71,18 +72,31 @@ public class HighRiserPlayer : MonoBehaviour
 
         if (cameraTransform != null && transform.position.y > jumpHeightThreshold)
             {
-                cameraTransform.Translate(Vector3.up * cameraMoveSpeed * Time.deltaTime);
+               // cameraTransform.Translate(Vector3.up * cameraMoveSpeed * Time.deltaTime);
             }
             else if (cameraTransform != null)
             {
                 // Reset the camera to its default state if the player descends
                 float currentCameraY = Mathf.Lerp(cameraTransform.position.y, originalCameraY, Time.deltaTime);
-                cameraTransform.position = new Vector3(cameraTransform.position.x, currentCameraY, cameraTransform.position.z);
+                //cameraTransform.position = new Vector3(cameraTransform.position.x, currentCameraY, cameraTransform.position.z);
             }
         }
 
-        
-    
+    void MoveCamera()
+    {
+        // Define the target position for the camera
+        Vector3 targetPosition = Camera.main.transform.position + new Vector3(0f, 0.4f, 0f);
+
+        // Use smoothstep for easing the interpolation
+        float lerpSpeed = 0.05f; // Adjust this value to control the speed of the camera movement
+        float smoothStep = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(lerpSpeed * Time.deltaTime));
+
+        // Use Vector3.Lerp to smoothly interpolate between the current and target positions
+        Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPosition, smoothStep);
+
+
+    }
+
 
     void OnCollisionEnter2D(UnityEngine.Collision2D collision)
     {
@@ -176,5 +190,17 @@ public class HighRiserPlayer : MonoBehaviour
             this.GetComponent<SpriteRenderer>().flipX = false;
         }
         else { this.GetComponent<SpriteRenderer>().flipX = true; }
+    }
+
+    bool IsTouchInput()
+    {
+        // Check if there is any touch input on the screen
+        if (Input.touchCount > 0)
+        {
+            // You can customize the touch condition based on your game design
+            return Input.GetTouch(0).phase == TouchPhase.Began;
+        }
+
+        return false;
     }
 }
