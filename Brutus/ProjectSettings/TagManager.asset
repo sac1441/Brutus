@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Wall
   - Ground
+  - EndWall
+  - Obstacle
+  - Rum
   layers:
   - Default
   - TransparentFX

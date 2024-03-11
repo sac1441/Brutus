@@ -15,10 +15,34 @@ public class HighRiserPlayer : MonoBehaviour
     public float cameraMoveSpeed = 2f;
     private float jumpHeightThreshold =5;
     private float originalCameraY;
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+
+    private SpriteRenderer playerSpriteRenderer;
+    private bool isBlinking = false;
+
+    public AudioClip collisionSound; // Assign your collision sound in the Unity Editor
+    public AudioClip deathSound; // Assign your death sound in the Unity Editor
+    public  AudioSource audioSource;
+
+    public GameObject WinScreen;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+<<<<<<< Updated upstream
+=======
+        originalCameraY = cameraTransform.position.y;
+        initialPosition = this.transform.position;
+        initialRotation = this.transform.rotation;
+
+        playerSpriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (audioSource == null)
+        {
+            Debug.LogError("AudioSource component not found! Please attach an AudioSource component.");
+        }
+>>>>>>> Stashed changes
     }
 
     void Update()
@@ -60,6 +84,29 @@ public class HighRiserPlayer : MonoBehaviour
 
     void OnCollisionEnter2D(UnityEngine.Collision2D collision)
     {
+
+        // Check if the player collides with another GameObject tagged as "Obstacle"
+        if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            // Play collision sound
+            if (audioSource != null && collisionSound != null)
+            {
+                audioSource.PlayOneShot(collisionSound);
+            }
+            // Delay the reset of the player's position
+            Invoke("ResetPlayerPosition", 1f);
+
+            // Start the blink effect
+            
+        }
+
+        if (collision.gameObject.CompareTag("Rum"))
+        {
+
+            WinScreen.SetActive(true);
+        }
+
+
         // Check if the player has collided with the ground/platform
         if (collision.gameObject.CompareTag("Ground"))
         {
@@ -79,5 +126,41 @@ public class HighRiserPlayer : MonoBehaviour
             // Change direction only when hitting the wall on the right side (x > 0)
             moveSpeed = -Mathf.Abs(moveSpeed); // Make moveSpeed negative
         }
+    }
+
+    void ResetPlayerPosition()
+    {
+        // Set the player's position to a specific reset position
+        // You can customize this position based on your requirements
+        transform.position = initialPosition;
+        transform.rotation = initialRotation;
+        isBlinking = true;
+
+        StartCoroutine(BlinkEffect(1f, 0.08f));
+
+
+
+        // Set a flag to prevent multiple blink effects during the delay
+        
+        moveSpeed = -.75f;
+        // Reset the blink flag
+        isBlinking = false;
+    }
+
+    System.Collections.IEnumerator BlinkEffect(float duration, float blinkInterval)
+    {
+        // Toggle the visibility of the player's sprite in a loop for the given duration
+        float timer = 0f;
+        
+        while (timer < duration)
+        {
+            playerSpriteRenderer.enabled = !playerSpriteRenderer.enabled;
+            yield return new WaitForSeconds(blinkInterval);
+            timer += blinkInterval;
+        }
+
+        // Ensure the player's sprite is visible at the end of the blink effect
+        playerSpriteRenderer.enabled = true;
+        moveSpeed = -1.42f;
     }
 }
