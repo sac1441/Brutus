@@ -6,6 +6,10 @@ public class HighRiserPlayer : MonoBehaviour
     public float jumpForce = 10f;
     public float gravityMultiplier = 2f; // Initial gravity multiplier
     public float jumpGravityMultiplier = 4f; // Gravity multiplier during jump
+    private float lastJumpTime;
+
+
+    public float jumpCooldown = .1f; // Adjust this value to set the cooldown period
 
 
     private bool isGrounded;
@@ -47,6 +51,12 @@ public class HighRiserPlayer : MonoBehaviour
 
     }
 
+    bool CanJump()
+    {
+        // Check if enough time has passed since the last jump
+        return Time.time - lastJumpTime >= jumpCooldown;
+    }
+
     void Update()
     {
         // Move left and right continuously
@@ -58,10 +68,13 @@ public class HighRiserPlayer : MonoBehaviour
         // Jump when the space button is pressed and the player is grounded
         if ((Input.GetButtonDown("Jump") || IsTouchInput()) && isGrounded)
         {
-            rb.AddForce(Vector3.up * jumpForce, (ForceMode2D)ForceMode.Impulse);
+            // Calculate the jump velocity manually
+            Vector2 jumpVelocity = new Vector2(0f, jumpForce);
+            GetComponent<Rigidbody2D>().velocity = jumpVelocity;
             isGrounded = false;
             // Increase gravity during the jump
             rb.gravityScale = jumpGravityMultiplier;
+            lastJumpTime = Time.time;
             MoveCamera();
         }
 
