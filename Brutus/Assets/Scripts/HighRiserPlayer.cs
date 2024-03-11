@@ -149,13 +149,13 @@ public class HighRiserPlayer : MonoBehaviour
             Debug.Log("Ammachi");
             // Change direction only when hitting the wall on the left side (x < 0)
             moveSpeed = Mathf.Abs(moveSpeed); // Make moveSpeed positive
-            Flip();
+            this.GetComponent<SpriteRenderer>().flipX = true;
         }
         else if (collision.gameObject.CompareTag("Wall") && transform.position.x > 0)
         {
             // Change direction only when hitting the wall on the right side (x > 0)
             moveSpeed = -Mathf.Abs(moveSpeed); // Make moveSpeed negativeFlip();
-            Flip();
+            this.GetComponent<SpriteRenderer>().flipX = false;
         }
     }
 
