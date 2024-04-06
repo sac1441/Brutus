@@ -8,30 +8,36 @@ public class HighRiserPlayer : MonoBehaviour
     public float gravityMultiplier = 2f;
     public float jumpGravityMultiplier = 4f;
     public float wallCollisionCheckDistance = 0.1f;
-    
+
     private bool isGrounded;
     private Rigidbody2D rb;
     private float movementDirection = 1f; // Initial movement direction
 
     public Transform cameraTransform;
-<<<<<<< Updated upstream
+
     public float cameraMoveSpeed = 2f;
     private float jumpHeightThreshold = 5;
-=======
-    public float cameraMoveSpeed = 100f;
-    private float jumpHeightThreshold =5;
->>>>>>> Stashed changes
+
     private float originalCameraY;
 
-
- 
     public float cameraMoveDistance = .5f; // Reduced distance to move the camera vertically
-    private float cameraFollowSpeed =5f;
+    private float cameraFollowSpeed = 5f;
+
+    // Blinking variables
+    public float blinkDuration = 1f; // Duration for which the player will blink
+    private bool isBlinking = false;
+    public float blinkInterval = 0.1f; // Interval between each blink
+
+    private Vector3 initialPlayerPosition;
+    private Quaternion initialRotation;
+    private bool facingLeft = true; // Player's facing direction (initially left)
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         originalCameraY = cameraTransform.position.y;
+        initialPlayerPosition = transform.position;
+        initialRotation = transform.rotation;
     }
 
     void Update()
@@ -40,17 +46,19 @@ public class HighRiserPlayer : MonoBehaviour
         SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
 
         // Flip the sprite based on the movement direction
-        spriteRenderer.flipX = movementDirection < 0;
+        spriteRenderer.flipX = !facingLeft; // Flip the sprite if not facing left
 
         // Move continuously left and right
-        Vector3 movement = new Vector3(movementDirection, 0f, 0f);
-        transform.Translate(movement * moveSpeed * Time.deltaTime);
-
-        if (isGrounded)
+        if (!isBlinking) // Only move if not blinking
+        {
+            Vector3 movement = new Vector3(movementDirection, 0f, 0f);
             transform.Translate(movement * moveSpeed * Time.deltaTime);
+            if (isGrounded)
+                transform.Translate(movement * moveSpeed * Time.deltaTime);
+        }
 
         // Jump when the space button is pressed and the player is grounded
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump") && isGrounded && !isBlinking)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);
             isGrounded = false;
@@ -62,7 +70,6 @@ public class HighRiserPlayer : MonoBehaviour
         rb.velocity += Vector2.down * (rb.gravityScale - 1) * gravityMultiplier * Time.deltaTime;
 
         if (cameraTransform != null && transform.position.y > jumpHeightThreshold)
-<<<<<<< Updated upstream
         {
             cameraTransform.Translate(Vector3.up * cameraMoveSpeed * Time.deltaTime);
         }
@@ -72,19 +79,9 @@ public class HighRiserPlayer : MonoBehaviour
             float currentCameraY = Mathf.Lerp(cameraTransform.position.y, originalCameraY, Time.deltaTime);
             cameraTransform.position = new Vector3(cameraTransform.position.x, currentCameraY, cameraTransform.position.z);
         }
-=======
-            {
-                cameraTransform.Translate(Vector3.up * cameraMoveSpeed * Time.deltaTime);
-            }
-            else if (cameraTransform != null)
-            {
-                // Reset the camera to its default state if the player descends
-                float currentCameraY = Mathf.Lerp(cameraTransform.position.y, originalCameraY, Time.deltaTime);
-                //cameraTransform.position = new Vector3(cameraTransform.position.x, currentCameraY, cameraTransform.position.z);
-            }
 
         // Update camera position to follow the player vertically
-        Vector3 targetCameraPosition = new Vector3(cameraTransform.position.x, transform.position.y+2, cameraTransform.position.z);
+        Vector3 targetCameraPosition = new Vector3(cameraTransform.position.x, transform.position.y + 2, cameraTransform.position.z);
         cameraTransform.position = Vector3.Lerp(cameraTransform.position, targetCameraPosition, cameraFollowSpeed * Time.deltaTime);
     }
 
@@ -99,9 +96,6 @@ public class HighRiserPlayer : MonoBehaviour
 
         // Use Vector3.Lerp to smoothly interpolate between the current and target positions
         Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPosition, smoothStep);
-
-
->>>>>>> Stashed changes
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -124,8 +118,6 @@ public class HighRiserPlayer : MonoBehaviour
             }
         }
 
-
-
         // Check if the player has collided with a wall to change direction
         if (collision.gameObject.CompareTag("Wall"))
         {
@@ -136,7 +128,16 @@ public class HighRiserPlayer : MonoBehaviour
             {
                 // Flip the movement direction based on the wall hit
                 movementDirection *= -1;
+                facingLeft = !facingLeft; // Update facing direction
             }
+        }
+
+        // Check if the player has collided with an obstacle
+        if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            
+            // Respawn the player and start blinking
+            StartCoroutine(RespawnAndBlink(true));
         }
     }
 
@@ -153,5 +154,31 @@ public class HighRiserPlayer : MonoBehaviour
         }
 
         cameraTransform.position = targetPosition; // Ensure the camera reaches the target position exactly
+    }
+
+    IEnumerator RespawnAndBlink(bool direction)
+    {
+
+        // Respawn the player
+        transform.position = initialPlayerPosition;
+        
+
+        // Start blinking coroutine
+        isBlinking = true;
+        float endTime = Time.time + blinkDuration;
+        while (Time.time < endTime)
+        {
+            
+            // Toggle player visibility
+            GetComponent<SpriteRenderer>().enabled = !GetComponent<SpriteRenderer>().enabled;
+            // Wait for blink interval
+            yield return new WaitForSeconds(blinkInterval);
+        }
+
+        // Ensure player is visible when blinking ends
+        GetComponent<SpriteRenderer>().enabled = true;
+
+        // Reset blink flag
+        isBlinking = false;
     }
 }

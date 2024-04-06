@@ -1815,7 +1815,7 @@ SpriteRenderer:
   m_Size: {x: 0.1, y: 0.23}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &519420028
@@ -2340,7 +2340,7 @@ SpriteRenderer:
   m_Size: {x: 0.1, y: 0.23}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &569864823
@@ -2804,7 +2804,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 867b21023f0d74a48b58ac00ccbe2558, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -3204,7 +3204,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 867b21023f0d74a48b58ac00ccbe2558, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -3997,7 +3997,7 @@ GameObject:
   - component: {fileID: 987618490}
   m_Layer: 0
   m_Name: Player
-  m_TagString: EndWall
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4157,13 +4157,9 @@ MonoBehaviour:
   jumpForce: 10.5
   gravityMultiplier: 5
   jumpGravityMultiplier: 6
-  jumpCooldown: 1.5
+  wallCollisionCheckDistance: 0.1
   cameraTransform: {fileID: 519420032}
   cameraMoveSpeed: 2
-  collisionSound: {fileID: 8300000, guid: 325e8d11268f7464ab5273a23a1e402e, type: 3}
-  deathSound: {fileID: 0}
-  audioSource: {fileID: 0}
-  WinScreen: {fileID: 0}
   cameraMoveDistance: 5
 --- !u!95 &987618489
 Animator:
@@ -4198,7 +4194,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d3b4a67418bdf3c48bbda93130da564f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  soundClip: {fileID: 8300000, guid: 325e8d11268f7464ab5273a23a1e402e, type: 3}
 --- !u!82 &987618491
 AudioSource:
   m_ObjectHideFlags: 0
@@ -4376,7 +4371,7 @@ SpriteRenderer:
   m_Size: {x: 5.4, y: 12}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1088575966
@@ -6992,7 +6987,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 867b21023f0d74a48b58ac00ccbe2558, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -7773,7 +7768,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 867b21023f0d74a48b58ac00ccbe2558, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
