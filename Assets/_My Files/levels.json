@@ -1,0 +1,17 @@
+{
+  "platforms": [
+    { "y": -14, "floors": [1,1,1,1,1,1,1,1,1], "leftWall": true,  "rightWall": false },
+    { "y": -11, "floors": [1,1,1,1,1,1,1,1,1], "leftWall": false, "rightWall": true  },
+    { "y": -8,  "floors": [1,1,1,0,0,1,1,1,1], "leftWall": true,  "rightWall": false },
+    { "y": -5,  "floors": [1,1,1,1,1,1,1,1,1], "leftWall": false, "rightWall": false },
+    { "y": -2,  "floors": [1,1,1,1,1,1,1,1,1], "leftWall": true,  "rightWall": false },
+    { "y": 1,   "floors": [1,1,1,1,1,1,1,1,1], "leftWall": false, "rightWall": true  },
+    { "y": 4,   "floors": [1,1,1,1,1,1,1,1,1], "leftWall": true,  "rightWall": false },
+    { "y": 7,   "floors": [1,1,1,1,1,1,1,1,1], "leftWall": false, "rightWall": false },
+    { "y": 10,  "floors": [1,1,1,1,1,1,1,1,1], "leftWall": false, "rightWall": true  },
+    { "y": 13,  "floors": [1,1,1,1,1,1,1,1,1], "leftWall": true,  "rightWall": false },
+    { "y": 16,  "floors": [1,1,1,1,1,1,1,1,1], "leftWall": false, "rightWall": false },
+    { "y": 19,  "floors": [1,1,1,1,1,1,1,1,1], "leftWall": true,  "rightWall": false },
+    { "y": 22,  "floors": [1,1,1,1,1,1,1,1,1], "leftWall": false, "rightWall": true  }
+  ]
+}
