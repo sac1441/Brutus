@@ -1,6 +1,8 @@
 # Brutus 🎮
 
+
 ![Demo](Brutus.gif)
+
 
 A Unity-based hypercasual game project focused on responsive controls, smooth gameplay, and mobile-first design.
 
