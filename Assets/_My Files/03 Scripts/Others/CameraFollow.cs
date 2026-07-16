@@ -5,11 +5,21 @@ public class CameraFollow : MonoBehaviour
     public enum Mode { Vertical, Horizontal }
 
     public Transform player;
-    public float smoothSpeed = 0.125f;
+
+    [Tooltip("Smaller = snappier, larger = smoother. Typical range 0.1 - 0.4")]
+    public float smoothTime = 0.2f;
+
+    [Tooltip("Cap on camera speed (units/sec). Mathf.Infinity = uncapped.")]
+    public float maxSpeed = Mathf.Infinity;
+
     public float offset = 8f;
 
     private Mode _currentMode = Mode.Vertical;
     private float _targetX;
+
+    // SmoothDamp velocity state
+    private float _velX;
+    private float _velY;
 
     private void Awake()
     {
@@ -20,36 +30,34 @@ public class CameraFollow : MonoBehaviour
     {
         _currentMode = newMode;
         _targetX = targetX;
-        Debug.Log($"Camera mode → {newMode}, targetX → {targetX}");
+    }
+
+    public void SetTargetX(float x)
+    {
+        _targetX = x;
     }
 
     void LateUpdate()
     {
         if (player == null) return;
 
+        float newX = transform.position.x;
+        float newY = transform.position.y;
+
         switch (_currentMode)
         {
             case Mode.Vertical:
                 float targetY = player.position.y >= offset ? player.position.y : transform.position.y;
-                Vector3 target = new Vector3(
-                    Mathf.Lerp(transform.position.x, _targetX, smoothSpeed * 4f),
-                    targetY,
-                    transform.position.z);
-                transform.position = Vector3.Lerp(transform.position, target, smoothSpeed);
+                newX = Mathf.SmoothDamp(transform.position.x, _targetX, ref _velX, smoothTime, maxSpeed, Time.deltaTime);
+                newY = Mathf.SmoothDamp(transform.position.y, targetY, ref _velY, smoothTime, maxSpeed, Time.deltaTime);
                 break;
 
             case Mode.Horizontal:
-                Vector3 fullTarget = new Vector3(
-                    player.position.x,
-                    player.position.y,
-                    transform.position.z);
-                transform.position = Vector3.Lerp(transform.position, fullTarget, smoothSpeed);
+                newX = Mathf.SmoothDamp(transform.position.x, player.position.x, ref _velX, smoothTime, maxSpeed, Time.deltaTime);
+                newY = Mathf.SmoothDamp(transform.position.y, player.position.y, ref _velY, smoothTime, maxSpeed, Time.deltaTime);
                 break;
         }
-    }
 
-    public void SetTargetX(float x)
-    {
-        _targetX = x;
+        transform.position = new Vector3(newX, newY, transform.position.z);
     }
 }

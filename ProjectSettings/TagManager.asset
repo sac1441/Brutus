@@ -10,6 +10,7 @@ TagManager:
   - Left Wall
   - StackHorizontal
   - StackVertical
+  - Vertical_v
   layers:
   - Default
   - TransparentFX
@@ -19,10 +20,10 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
+  - RCC_Vehicle
+  - RCC_WheelCollider
+  - RCC_DetachablePart
+  - RCC_Prop
   - 
   - 
   - 

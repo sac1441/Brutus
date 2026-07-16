@@ -101,7 +101,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8653685737581634818}
   m_LocalRotation: {x: 0.999962, y: 0, z: -0.008726558, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -109,7 +109,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 180, y: 1, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0.75, y: 3.16}
   m_SizeDelta: {x: 20, y: 5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &1278087088749349039
@@ -137,7 +137,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  - {fileID: -5422281218571611453, guid: 650720e2492059040b057318360d0b1d, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -181,10 +181,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Sample text
+  m_text: 20
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 650720e2492059040b057318360d0b1d, type: 2}
+  m_sharedMaterial: {fileID: -5422281218571611453, guid: 650720e2492059040b057318360d0b1d, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -208,8 +208,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -247,7 +247,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: 11.829824, w: 1.5024304}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   _SortingLayer: 0
@@ -486,8 +486,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44f3938356279e84e84df6a844613d39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaffoldController
-  pteroMoveDistance: 3
-  vineFadeDuration: 0.3
+  pteroMoveDistance: 6
+  floorsPerHit: 2
   pteroMoveDuration: 0.4
 --- !u!1001 &3893212832177715363
 PrefabInstance:
@@ -846,6 +846,10 @@ PrefabInstance:
       propertyPath: m_Offset.y
       value: -0.0074341595
       objectReference: {fileID: 0}
+    - target: {fileID: 1391404430009417143, guid: 0244373ca7dc69340bd2e9533d9cf4e1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -12.25
+      objectReference: {fileID: 0}
     - target: {fileID: 1983133067045021970, guid: 0244373ca7dc69340bd2e9533d9cf4e1, type: 3}
       propertyPath: m_LocalPosition.x
       value: -22
@@ -894,6 +898,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Untagged
       objectReference: {fileID: 0}
+    - target: {fileID: 6062438876173785917, guid: 0244373ca7dc69340bd2e9533d9cf4e1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6224740338441897988, guid: 0244373ca7dc69340bd2e9533d9cf4e1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8719332059488025310, guid: 0244373ca7dc69340bd2e9533d9cf4e1, type: 3}
       propertyPath: m_TagString
       value: Left Wall
@@ -923,9 +935,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 44f3938356279e84e84df6a844613d39, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaffoldController
-  pteroMoveDistance: 3
-  vineFadeDuration: 0.3
-  pteroMoveDuration: 0.4
+  pteroMoveDistance: 6
+  floorsPerHit: 2
+  pteroMoveDuration: 0.2
 --- !u!4 &6705209999995913340 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1983133067045021970, guid: 0244373ca7dc69340bd2e9533d9cf4e1, type: 3}

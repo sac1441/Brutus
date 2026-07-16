@@ -11,7 +11,7 @@ public class ScoreManager : MonoBehaviour
     private void AddScore()
     {
         score++;
-        scoreText.text = "Score : " + score.ToString();
+        scoreText.text = score.ToString();
     }
 
     private void Start()

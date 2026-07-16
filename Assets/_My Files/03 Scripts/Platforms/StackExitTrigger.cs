@@ -3,31 +3,38 @@ using TarodevController;
 
 public class StackExitTrigger : MonoBehaviour
 {
-    [SerializeField] private CameraFollow.Mode triggerMode = CameraFollow.Mode.Vertical;
+    [SerializeField] private CameraFollow.Mode triggerMode;
 
-    private bool _activated = false;
+    private CameraFollow _cam;
+    private PlayerController _player;
 
-    // Called by LevelSequencer at runtime to set the correct mode
-    public void SetTriggerMode(CameraFollow.Mode mode)
+    private void Awake()
     {
-        triggerMode = mode;
+        _cam = Camera.main.GetComponent<CameraFollow>();
+        _player = FindFirstObjectByType<PlayerController>();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (_activated) return;
         if (!other.CompareTag("Player")) return;
 
-        float targetX = transform.parent.position.x;
+        float targetX;
 
-        CameraFollow cam = Camera.main.GetComponent<CameraFollow>();
-        if (cam != null)
-            cam.SetMode(triggerMode, targetX);
+        if (triggerMode == CameraFollow.Mode.Vertical)
+        {
+            // Use current camera X to avoid snap/jitter on mode entry
+            targetX = Camera.main.transform.position.x;
+        }
+        else
+        {
+            targetX = transform.parent.position.x;
+        }
 
-        PlayerController player = other.GetComponent<PlayerController>();
-        if (player != null)
-            player.SetFloorY(transform.position.y, triggerMode);
+        _cam?.SetMode(triggerMode, targetX);
 
-        _activated = true;
+        if (triggerMode == CameraFollow.Mode.Horizontal)
+            _player?.SetFloorY(transform.position.y, CameraFollow.Mode.Horizontal);
+        else
+            _player?.SetFloorY(float.MinValue, CameraFollow.Mode.Vertical);
     }
 }

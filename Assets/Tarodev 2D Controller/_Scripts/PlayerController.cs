@@ -29,14 +29,18 @@ namespace TarodevController
         private bool _grounded;
 
         private const float INPUT_DELAY = 0.2f;
+        private int _startFrame;
 
-        // -------------------------------------------------------
-        // Horizontal stack death detection
-        // -------------------------------------------------------
         private float _floorY = float.MinValue;
         private CameraFollow.Mode _currentStackMode = CameraFollow.Mode.Vertical;
 
-        // Called by StackExitTrigger when player enters a new stack
+        // Each tap is queued here and consumed on landing — taps are never dropped.
+        private int _jumpQueue = 0;
+
+        // Optional safety cap so mad mashing can't stack an absurd number of jumps.
+        // Set to a high number (or comment out the clamp in GatherInput) for truly unlimited queuing.
+        private const int MAX_JUMP_QUEUE = 3;
+
         public void SetFloorY(float floorY, CameraFollow.Mode mode)
         {
             _floorY = floorY;
@@ -49,6 +53,14 @@ namespace TarodevController
             _col = GetComponent<CapsuleCollider2D>();
             _cachedQueryStartInColliders = Physics2D.queriesStartInColliders;
             _time = 0;
+            _startFrame = Time.frameCount;
+
+            _jumpQueue = 0;
+            _bufferedJumpUsable = false;
+            _endedJumpEarly = false;
+            _coyoteUsable = false;
+            _timeJumpWasPressed = float.MinValue;
+            _frameLeftGrounded = float.MinValue;
         }
 
         private void Update()
@@ -58,21 +70,12 @@ namespace TarodevController
             CheckRespawn();
         }
 
-        // -------------------------------------------------------
-        // RESPAWN — handles both vertical and horizontal stacks
-        // -------------------------------------------------------
         private void CheckRespawn()
         {
             Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
 
-            // Vertical stack — fell below camera bottom
             bool fellOffBottom = viewportPos.y < 0f;
-
-            // Vertical stack — drifted off sides
             bool fellOffSides = viewportPos.x < -0.1f || viewportPos.x > 1.1f;
-
-            // Horizontal stack — camera follows player so viewport won't catch falls
-            // Only triggers when falling downward (not while jumping)
             bool fellBetweenPlatforms = _currentStackMode == CameraFollow.Mode.Horizontal
                                         && transform.position.y < _floorY - 3f
                                         && _rb.linearVelocity.y < -1f;
@@ -85,6 +88,9 @@ namespace TarodevController
 
         private void GatherInput()
         {
+            if (_time < INPUT_DELAY) return;
+            if (Time.frameCount <= _startFrame + 1) return;
+
             bool jumpPressed = false;
 
             if (Input.touchCount > 0)
@@ -103,16 +109,11 @@ namespace TarodevController
                 Move = Vector2.zero
             };
 
-            if (_frameInput.JumpDown && _time > INPUT_DELAY)
+            if (_frameInput.JumpDown)
             {
-                _jumpToConsume = true;
+                // Queue every tap instead of discarding — consumed on landing.
+                _jumpQueue = Mathf.Min(_jumpQueue + 1, MAX_JUMP_QUEUE);
                 _timeJumpWasPressed = _time;
-
-                if (_grounded || CanUseCoyote)
-                {
-                    ExecuteJump();
-                    _jumpToConsume = false;
-                }
             }
         }
 
@@ -173,10 +174,15 @@ namespace TarodevController
                 _endedJumpEarly = false;
                 GroundedChanged?.Invoke(true, Mathf.Abs(_frameVelocity.y));
 
-                // Camera X realignment on landing
                 RaycastHit2D platformHit = Physics2D.Raycast(_col.bounds.center, Vector2.down, _col.bounds.extents.y + 0.3f, ~_stats.PlayerLayer);
                 if (platformHit.collider != null && CameraFollow != null)
-                    CameraFollow.SetTargetX(platformHit.transform.position.x);
+                {
+                    Transform stackRoot = platformHit.transform.parent?.parent;
+                    if (stackRoot != null && stackRoot.CompareTag("Vertical_v"))
+                    {
+                        CameraFollow.SetTargetX(platformHit.transform.parent.position.x);
+                    }
+                }
             }
             else if (_grounded && !groundHit)
             {
@@ -191,37 +197,29 @@ namespace TarodevController
                 airTime += Time.timeScale;
 
             Physics2D.queriesStartInColliders = _cachedQueryStartInColliders;
-
-            RaycastHit2D _platformHit = Physics2D.Raycast(_col.bounds.center, Vector2.down, _col.bounds.extents.y + 0.3f, ~_stats.PlayerLayer);
-            if (_platformHit.collider != null)
-                Debug.Log($"Hit: {_platformHit.collider.gameObject.name} | parent: {_platformHit.transform.parent?.gameObject.name} | parentX: {_platformHit.transform.parent?.position.x}");
         }
 
-        private bool _jumpToConsume;
         private bool _bufferedJumpUsable;
         private bool _endedJumpEarly;
         private bool _coyoteUsable;
         private float _timeJumpWasPressed;
 
-        private bool HasBufferedJump => _bufferedJumpUsable && _time < _timeJumpWasPressed + _stats.JumpBuffer;
         private bool CanUseCoyote => _coyoteUsable && !_grounded && _time < _frameLeftGrounded + _stats.CoyoteTime;
 
         private void HandleJump()
         {
-            if (_jumpToConsume && _time > _timeJumpWasPressed + _stats.JumpBuffer)
-                _jumpToConsume = false;
+            // Nothing queued, nothing to do.
+            if (_jumpQueue <= 0) return;
 
-            if (!_jumpToConsume && !HasBufferedJump) return;
-
+            // Fire one queued jump per landing (or coyote window). Runs once per FixedUpdate,
+            // so a single jump leaves the ground before the next queued one can fire.
             if (_grounded || CanUseCoyote)
-            {
                 ExecuteJump();
-                _jumpToConsume = false;
-            }
         }
 
         private void ExecuteJump()
         {
+            _jumpQueue = Mathf.Max(0, _jumpQueue - 1);
             _endedJumpEarly = false;
             _timeJumpWasPressed = 0;
             _bufferedJumpUsable = false;
@@ -247,6 +245,11 @@ namespace TarodevController
             else
             {
                 var inAirGravity = _stats.FallAcceleration;
+
+                // Extra gravity on the way down for snappier feel
+                if (_frameVelocity.y < 0)
+                    inAirGravity *= 1.8f;
+
                 _frameVelocity.y = Mathf.MoveTowards(_frameVelocity.y, -_stats.MaxFallSpeed, inAirGravity * Time.fixedDeltaTime);
             }
         }
