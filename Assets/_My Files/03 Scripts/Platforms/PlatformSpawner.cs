@@ -10,6 +10,10 @@ public class PlatformSpawner : MonoBehaviour
     public GameObject coinPrefab;
     public GameObject trapPrefab;
 
+    [Header("Obstacles")]
+    public GameObject dragonLeftPrefab;
+    public GameObject dragonRightPrefab;
+
     [Header("Player")]
     public Transform player;
 
@@ -348,6 +352,39 @@ public class PlatformSpawner : MonoBehaviour
                 }
             }
         }
+        // ---------------- SCAFFOLD ----------------
+
+        if (config.hasScaffold)
+        {
+            Debug.Log("SPAWNING SCAFFOLD AT Y : " + config.y);
+
+            if (dragonLeftPrefab != null)
+            {
+                Instantiate(
+                    dragonLeftPrefab,
+                    new Vector3(0, config.y, 0),
+                    Quaternion.identity
+                );
+            }
+            else
+            {
+                Debug.LogWarning("dragonLeftPrefab NOT ASSIGNED");
+            }
+
+            if (dragonRightPrefab != null)
+            {
+                Instantiate(
+                    dragonRightPrefab,
+                    new Vector3(0, config.y, 0),
+                    Quaternion.identity
+                );
+            }
+            else
+            {
+                Debug.LogWarning("dragonRightPrefab NOT ASSIGNED");
+            }
+        }
+
         return platform;
     }
 
