@@ -38,7 +38,6 @@ namespace TarodevController
         private int _jumpQueue = 0;
 
         // Optional safety cap so mad mashing can't stack an absurd number of jumps.
-        // Set to a high number (or comment out the clamp in GatherInput) for truly unlimited queuing.
         private const int MAX_JUMP_QUEUE = 3;
 
         public void SetFloorY(float floorY, CameraFollow.Mode mode)
@@ -111,8 +110,16 @@ namespace TarodevController
 
             if (_frameInput.JumpDown)
             {
-                // Queue every tap instead of discarding — consumed on landing.
-                _jumpQueue = Mathf.Min(_jumpQueue + 1, MAX_JUMP_QUEUE);
+                // If we're grounded and already have a jump queued, extra clicks
+                // right now are the same intended jump (double/triple-click),
+                // not a request for a second jump later. Don't queue them —
+                // otherwise they sit and fire late on the *next* landing,
+                // disconnected from this click burst.
+                bool redundantWhileGrounded = _grounded && _jumpQueue > 0;
+
+                if (!redundantWhileGrounded)
+                    _jumpQueue = Mathf.Min(_jumpQueue + 1, MAX_JUMP_QUEUE);
+
                 _timeJumpWasPressed = _time;
             }
         }

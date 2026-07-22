@@ -22,8 +22,11 @@ public class StackExitTrigger : MonoBehaviour
 
         if (triggerMode == CameraFollow.Mode.Vertical)
         {
-            // Use current camera X to avoid snap/jitter on mode entry
-            targetX = Camera.main.transform.position.x;
+            // Use the stack's own X (not the camera's current X) -- stacks can now
+            // sit at shifted X positions after a Horizontal section, so locking to
+            // "wherever the camera currently is" no longer matches the stack being
+            // entered and cuts off part of the platform.
+            targetX = transform.parent.position.x;
         }
         else
         {

@@ -7,17 +7,22 @@ namespace TarodevController
     /// </summary>
     public class PlayerAnimator : MonoBehaviour
     {
-        [Header("Particles")] [SerializeField] private ParticleSystem _jumpParticles;
+        [Header("Particles")][SerializeField] private ParticleSystem _jumpParticles;
         [SerializeField] private ParticleSystem _launchParticles;
         [SerializeField] private ParticleSystem _moveParticles;
         [SerializeField] private ParticleSystem _landParticles;
 
-        [Header("Audio Clips")] [SerializeField]
+        [Header("Audio Clips")]
+        [SerializeField]
         private AudioClip[] _footsteps;
+
+        [Tooltip("Minimum time (seconds) between landing sounds. Prevents rapid re-triggering from ground-detection flicker.")]
+        [SerializeField] private float _landSoundCooldown = 0.15f;
 
         private AudioSource _source;
         private IPlayerController _player;
         private bool _grounded;
+        private float _lastLandSoundTime = float.MinValue;
         public ParticleSystem.MinMaxGradient _currentGradient;
 
         private void Awake()
@@ -62,13 +67,18 @@ namespace TarodevController
         private void OnGroundedChanged(bool grounded, float impact)
         {
             _grounded = grounded;
-            
+
             if (grounded)
             {
                 DetectGroundColor();
                 SetColor(_landParticles);
 
-                _source.PlayOneShot(_footsteps[Random.Range(0, _footsteps.Length)]);
+                if (Time.time - _lastLandSoundTime >= _landSoundCooldown)
+                {
+                    _lastLandSoundTime = Time.time;
+                    _source.PlayOneShot(_footsteps[Random.Range(0, _footsteps.Length)]);
+                }
+
                 _moveParticles.Play();
 
                 _landParticles.transform.localScale = Vector3.one * Mathf.InverseLerp(0, 40, impact);
