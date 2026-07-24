@@ -1,6 +1,7 @@
 ﻿using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 namespace TarodevController
@@ -85,12 +86,18 @@ namespace TarodevController
             if (Input.touchCount > 0)
             {
                 Touch touch = Input.GetTouch(0);
-                if (touch.phase == TouchPhase.Began)
+                bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touch.fingerId);
+
+                if (touch.phase == TouchPhase.Began && !overUI)
                     jumpPressed = true;
             }
 
             if (Input.GetMouseButtonDown(0))
-                jumpPressed = true;
+            {
+                bool overUI = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+                if (!overUI)
+                    jumpPressed = true;
+            }
 
             _frameInput = new FrameInput
             {

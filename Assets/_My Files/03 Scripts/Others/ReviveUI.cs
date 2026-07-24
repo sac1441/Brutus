@@ -8,6 +8,7 @@ public class ReviveUI : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerController playerController;
     [SerializeField] private GameObject revivePanel;
+    [SerializeField] private EggShopUI eggShopUI;
 
     [Header("Egg Revive")]
     [SerializeField] private int eggReviveCost = 30;
@@ -38,7 +39,7 @@ public class ReviveUI : MonoBehaviour
     private void Show()
     {
         if (eggCostText != null) eggCostText.text = eggReviveCost.ToString();
-        eggButton.interactable = playerController.EggCount >= eggReviveCost;
+        eggButton.interactable = true; // always clickable now - either revives or opens the shop
 
         if (revivePanel != null) revivePanel.SetActive(true);
     }
@@ -52,6 +53,16 @@ public class ReviveUI : MonoBehaviour
 
     private void OnEggReviveClicked()
     {
+        Debug.Log($"[ReviveUI] Egg button clicked. EggCount={playerController.EggCount}, eggReviveCost={eggReviveCost}, eggShopUI assigned={eggShopUI != null}");
+
+        if (playerController.EggCount < eggReviveCost)
+        {
+            Debug.Log("[ReviveUI] Not enough eggs - calling eggShopUI.Open(revivePanel)");
+            eggShopUI.Open(revivePanel);
+            return;
+        }
+
+        Debug.Log("[ReviveUI] Enough eggs - spending and reviving");
         if (!playerController.TrySpendEggs(eggReviveCost)) return;
 
         Hide();
