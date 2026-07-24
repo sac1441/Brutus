@@ -24,6 +24,23 @@ namespace TarodevController
         public Vector2 FrameInput => _frameInput.Move;
         public event Action<bool, float> GroundedChanged;
         public event Action Jumped;
+        public event Action Died;
+
+        public int EggCount => eggCount;
+
+        private Vector2 _lastSafePosition;
+        private bool _isDead;
+
+        // Horizontal-stack death detection (falling between platforms while
+        // the camera follows the player, so viewport bounds won't catch it)
+        private float _floorY = float.MinValue;
+        private CameraFollow.Mode _currentStackMode = CameraFollow.Mode.Vertical;
+
+        public void SetFloorY(float floorY, CameraFollow.Mode mode)
+        {
+            _floorY = floorY;
+            _currentStackMode = mode;
+        }
 
         private float _time;
         private bool _grounded;
@@ -31,20 +48,9 @@ namespace TarodevController
         private const float INPUT_DELAY = 0.2f;
         private int _startFrame;
 
-        private float _floorY = float.MinValue;
-        private CameraFollow.Mode _currentStackMode = CameraFollow.Mode.Vertical;
-
-        // Each tap is queued here and consumed on landing — taps are never dropped.
-        private int _jumpQueue = 0;
-
-        // Optional safety cap so mad mashing can't stack an absurd number of jumps.
-        private const int MAX_JUMP_QUEUE = 3;
-
-        public void SetFloorY(float floorY, CameraFollow.Mode mode)
-        {
-            _floorY = floorY;
-            _currentStackMode = mode;
-        }
+        // Airborne taps set this so the jump still fires on the next landing/coyote —
+        // never expires, never dropped, never stacks into multiple jumps.
+        private bool _jumpQueued = false;
 
         private void Awake()
         {
@@ -53,8 +59,9 @@ namespace TarodevController
             _cachedQueryStartInColliders = Physics2D.queriesStartInColliders;
             _time = 0;
             _startFrame = Time.frameCount;
+            _lastSafePosition = transform.position;
 
-            _jumpQueue = 0;
+            _jumpQueued = false;
             _bufferedJumpUsable = false;
             _endedJumpEarly = false;
             _coyoteUsable = false;
@@ -66,23 +73,6 @@ namespace TarodevController
         {
             _time += Time.deltaTime;
             GatherInput();
-            CheckRespawn();
-        }
-
-        private void CheckRespawn()
-        {
-            Vector3 viewportPos = Camera.main.WorldToViewportPoint(transform.position);
-
-            bool fellOffBottom = viewportPos.y < 0f;
-            bool fellOffSides = viewportPos.x < -0.1f || viewportPos.x > 1.1f;
-            bool fellBetweenPlatforms = _currentStackMode == CameraFollow.Mode.Horizontal
-                                        && transform.position.y < _floorY - 3f
-                                        && _rb.linearVelocity.y < -1f;
-
-            if (fellOffBottom || fellOffSides || fellBetweenPlatforms)
-            {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-            }
         }
 
         private void GatherInput()
@@ -105,22 +95,30 @@ namespace TarodevController
             _frameInput = new FrameInput
             {
                 JumpDown = jumpPressed,
-                Move = Vector2.zero
+                Move = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"))
             };
+
+            if (_stats.SnapInput)
+            {
+                _frameInput.Move.x = Mathf.Abs(_frameInput.Move.x) < _stats.HorizontalDeadZoneThreshold ? 0 : Mathf.Sign(_frameInput.Move.x);
+                _frameInput.Move.y = Mathf.Abs(_frameInput.Move.y) < _stats.VerticalDeadZoneThreshold ? 0 : Mathf.Sign(_frameInput.Move.y);
+            }
 
             if (_frameInput.JumpDown)
             {
-                // If we're grounded and already have a jump queued, extra clicks
-                // right now are the same intended jump (double/triple-click),
-                // not a request for a second jump later. Don't queue them —
-                // otherwise they sit and fire late on the *next* landing,
-                // disconnected from this click burst.
-                bool redundantWhileGrounded = _grounded && _jumpQueue > 0;
-
-                if (!redundantWhileGrounded)
-                    _jumpQueue = Mathf.Min(_jumpQueue + 1, MAX_JUMP_QUEUE);
-
                 _timeJumpWasPressed = _time;
+
+                // Fire instantly if we're allowed to right now - no waiting for FixedUpdate.
+                if (_grounded || CanUseCoyote)
+                {
+                    ExecuteJump();
+                }
+                else
+                {
+                    // Airborne - guarantee this click produces a jump the instant we land.
+                    // No expiry window: however long the flight takes, it still fires.
+                    _jumpQueued = true;
+                }
             }
         }
 
@@ -170,8 +168,10 @@ namespace TarodevController
         {
             Physics2D.queriesStartInColliders = false;
 
-            float groundCheckDistance = Mathf.Max(_stats.GrounderDistance, Mathf.Abs(_frameVelocity.y) * Time.fixedDeltaTime + _stats.GrounderDistance);
-            bool groundHit = Physics2D.CapsuleCast(_col.bounds.center, _col.size, _col.direction, 0, Vector2.down, groundCheckDistance, ~_stats.PlayerLayer);
+            RaycastHit2D groundHit = Physics2D.CapsuleCast(_col.bounds.center, _col.size, _col.direction, 0, Vector2.down, _stats.GrounderDistance, ~_stats.PlayerLayer);
+            bool ceilingHit = Physics2D.CapsuleCast(_col.bounds.center, _col.size, _col.direction, 0, Vector2.up, _stats.GrounderDistance, ~_stats.PlayerLayer);
+
+            if (ceilingHit) _frameVelocity.y = Mathf.Min(0, _frameVelocity.y);
 
             if (!_grounded && groundHit && _frameVelocity.y <= 0)
             {
@@ -179,17 +179,16 @@ namespace TarodevController
                 _coyoteUsable = true;
                 _bufferedJumpUsable = true;
                 _endedJumpEarly = false;
-                GroundedChanged?.Invoke(true, Mathf.Abs(_frameVelocity.y));
 
-                RaycastHit2D platformHit = Physics2D.Raycast(_col.bounds.center, Vector2.down, _col.bounds.extents.y + 0.3f, ~_stats.PlayerLayer);
-                if (platformHit.collider != null && CameraFollow != null)
-                {
-                    Transform stackRoot = platformHit.transform.parent?.parent;
-                    if (stackRoot != null && stackRoot.CompareTag("Vertical_v"))
-                    {
-                        CameraFollow.SetTargetX(platformHit.transform.parent.position.x);
-                    }
-                }
+                // Respawn point = middle of the platform we just landed on.
+                // Colliders live on individual Floor_Tile children, so the platform's
+                // actual center is the tile's PARENT transform position, not the tile's
+                // own collider bounds (same convention used for camera X targeting).
+                _lastSafePosition = groundHit.collider != null && groundHit.collider.transform.parent != null
+                    ? new Vector2(groundHit.collider.transform.parent.position.x, transform.position.y)
+                    : (Vector2)transform.position;
+
+                GroundedChanged?.Invoke(true, Mathf.Abs(_frameVelocity.y));
             }
             else if (_grounded && !groundHit)
             {
@@ -199,11 +198,63 @@ namespace TarodevController
             }
 
             if (_grounded)
+            {
                 airTime = 0f;
+            }
             else
+            {
                 airTime += Time.timeScale;
+            }
+
+            //player fell off screen - show the revive screen instead of a hard reset
+            if (airTime > 30f && !_isDead)
+            {
+                Die();
+            }
+
+            //horizontal stacks: camera follows the player so the airTime/viewport check
+            //above won't catch falling between platforms - use a floor-Y threshold instead
+            if (!_isDead && _currentStackMode == CameraFollow.Mode.Horizontal
+                && _floorY > float.MinValue && transform.position.y < _floorY - 3f)
+            {
+                Die();
+            }
 
             Physics2D.queriesStartInColliders = _cachedQueryStartInColliders;
+        }
+
+        private void Die()
+        {
+            _isDead = true;
+            airTime = 0f;
+            Time.timeScale = 0f;
+            Died?.Invoke();
+        }
+
+        /// <summary>
+        /// Attempts to spend eggs. Returns true and deducts the amount if the player has enough.
+        /// </summary>
+        public bool TrySpendEggs(int amount)
+        {
+            if (eggCount < amount) return false;
+
+            eggCount -= amount;
+            eggScoreText.text = eggCount.ToString();
+            return true;
+        }
+
+        /// <summary>
+        /// Revives the player at the last platform they were grounded on and resumes the game.
+        /// </summary>
+        public void Revive()
+        {
+            _isDead = false;
+            _rb.linearVelocity = Vector2.zero;
+            _frameVelocity = Vector2.zero;
+            transform.position = _lastSafePosition;
+            _grounded = false;
+            airTime = 0f;
+            Time.timeScale = 1f;
         }
 
         private bool _bufferedJumpUsable;
@@ -215,18 +266,19 @@ namespace TarodevController
 
         private void HandleJump()
         {
-            // Nothing queued, nothing to do.
-            if (_jumpQueue <= 0) return;
+            // Grounded clicks already fired instantly in GatherInput. This only
+            // handles airborne taps waiting for the next landing/coyote window,
+            // and it never expires — the click is never silently dropped.
+            if (!_jumpQueued) return;
 
-            // Fire one queued jump per landing (or coyote window). Runs once per FixedUpdate,
-            // so a single jump leaves the ground before the next queued one can fire.
             if (_grounded || CanUseCoyote)
                 ExecuteJump();
         }
 
         private void ExecuteJump()
         {
-            _jumpQueue = Mathf.Max(0, _jumpQueue - 1);
+            _grounded = false; // airborne the instant we jump - don't wait for physics to confirm it
+            _jumpQueued = false;
             _endedJumpEarly = false;
             _timeJumpWasPressed = 0;
             _bufferedJumpUsable = false;
@@ -252,11 +304,6 @@ namespace TarodevController
             else
             {
                 var inAirGravity = _stats.FallAcceleration;
-
-                // Extra gravity on the way down for snappier feel
-                if (_frameVelocity.y < 0)
-                    inAirGravity *= 1.8f;
-
                 _frameVelocity.y = Mathf.MoveTowards(_frameVelocity.y, -_stats.MaxFallSpeed, inAirGravity * Time.fixedDeltaTime);
             }
         }
