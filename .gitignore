@@ -73,3 +73,20 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# --- Local-only / non-project files ---
+/[Ss]creenshots/
+/[Ss]criptBackups/
+/[Pp]rofilerCaptures/
+/.vscode/
+/.idea/
+/[Aa]ssets/_Recovery/
+/[Aa]ssets/_Recovery.meta
+/[Aa]ssets/Screenshots.meta
+/[Aa]ssets/[Ss]creenshots/
+/[Aa]ssets/Resources/PerformanceTestRun*
+/PlayerController_*.cs
+
+# Signing keys - never commit
+*.keystore
+*.jks

@@ -71,6 +71,19 @@ public class StackSequenceGenerator : MonoBehaviour
             StackType type = PickStackType(stackNumber, count);
             GameObject prefabToUse = ResolvePrefab(type);
 
+            // ResolvePrefab() silently falls back to the Vertical prefab when the
+            // requested type's prefab isn't assigned (e.g. scaffoldStackPrefab is
+            // still unset). When that happens, treat this stack as Vertical for
+            // spacing/flag purposes too -- otherwise we'd place a plain vertical
+            // staircase using the Scaffold's much larger gap (42.6 vs 30), and the
+            // next stack would also inherit the "leaving a scaffold" exit gap,
+            // producing a broken/oversized jump the camera and player never see
+            // consistently until the real prefab is wired up.
+            if (type == StackType.Horizontal && prefabToUse == verticalStackPrefab)
+                type = StackType.Vertical;
+            if (type == StackType.Scaffold && prefabToUse == verticalStackPrefab)
+                type = StackType.Vertical;
+
             bool isNonVertical = (type != StackType.Vertical);
 
             float y, x;

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TarodevController;
 
 public class StackExitTrigger : MonoBehaviour
@@ -7,6 +7,15 @@ public class StackExitTrigger : MonoBehaviour
 
     private CameraFollow _cam;
     private PlayerController _player;
+
+    /// <summary>Camera mode for the stack this trigger belongs to.</summary>
+    public CameraFollow.Mode TriggerMode => triggerMode;
+    /// <summary>The stack root (trigger sits at Stack/Platform/CameraTrigger).</summary>
+    public Transform Stack => transform.parent != null ? transform.parent.parent : null;
+    /// <summary>The x the camera centres on for this stack.</summary>
+    public float StackTargetX => transform.parent != null ? transform.parent.position.x : transform.position.x;
+    /// <summary>Used by generated chunks (e.g. diagonal climbs) to set their camera mode.</summary>
+    public void SetTriggerMode(CameraFollow.Mode mode) { triggerMode = mode; }
 
     private void Awake()
     {
@@ -38,6 +47,6 @@ public class StackExitTrigger : MonoBehaviour
         if (triggerMode == CameraFollow.Mode.Horizontal)
             _player?.SetFloorY(transform.position.y, CameraFollow.Mode.Horizontal);
         else
-            _player?.SetFloorY(float.MinValue, CameraFollow.Mode.Vertical);
+            _player?.SetFloorY(float.MinValue, triggerMode);   // Vertical or Diagonal
     }
 }

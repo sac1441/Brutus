@@ -18,8 +18,8 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
+  -
+  - Wall
   - RCC_Vehicle
   - RCC_WheelCollider
   - RCC_DetachablePart
